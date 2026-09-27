@@ -248,18 +248,41 @@ function prepareCar(car, model) {
     shadowMats = [shadow.material];
   }
 
+  // --- wheels: re-pivot each wheel node round its own centre so it can roll
+  const wheels = [];
+  const lateral = new THREE.Vector3(1, 0, 0);
+  for (const n of cfg.wheels || []) {
+    const w = model.getObjectByName(sanitize(n));
+    if (!w) { console.warn(`[${car.id}] wheel not found: ${n}`); continue; }
+    const wb = new THREE.Box3().setFromObject(w);
+    const wc = wb.getCenter(new THREE.Vector3());
+    const ws = wb.getSize(new THREE.Vector3());
+    const pivot = new THREE.Group();
+    pivot.name = `${w.name}_pivot`;
+    w.parent.add(pivot);
+    pivot.position.copy(w.parent.worldToLocal(wc.clone()));
+    pivot.attach(w);
+    const inv = new THREE.Quaternion();
+    pivot.parent.getWorldQuaternion(inv).invert();
+    wheels.push({ pivot, axis: lateral.clone().applyQuaternion(inv).normalize(), radius: ws.y / 2 });
+  }
+
   // --- parts for the explode intro
   const partsRoot = findPartsRoot(model);
   const parts = partsRoot.children.filter((p) => !ground || (p !== ground && !p.getObjectById(ground.id)));
 
   root.visible = false;
   scene.add(root);
-  return { car, root, model, dims, paintMats, accentMats, coatMats, frontLights, rearLights, shadowMats, parts, meshes: meshes.filter((m) => m !== ground) };
+  return { car, root, model, dims, paintMats, accentMats, coatMats, frontLights, rearLights, shadowMats, wheels, parts, meshes: meshes.filter((m) => m !== ground) };
 }
 
 function isVisible(o) {
   for (let p = o; p; p = p.parent) if (!p.visible) return false;
   return true;
+}
+
+function spinWheels(entry, travelled) {
+  for (const w of entry.wheels) w.pivot.setRotationFromAxisAngle(w.axis, travelled / w.radius);
 }
 
 function setLights(entry, on, instant = false) {
@@ -396,6 +419,41 @@ function playIntro(entry) {
   });
 }
 
+// ---------------------------------------------------------------- transitions: drive out, drive in
+const DRIVE = 20; // metres travelled on and off stage
+
+function driveOut(entry) {
+  const s = { z: 0 };
+  return new Promise((resolve) => animate(s, {
+    z: DRIVE,
+    duration: 1300,
+    ease: 'inQuad',
+    onUpdate: () => { entry.root.position.z = s.z; spinWheels(entry, s.z); },
+    onComplete: () => {
+      entry.root.visible = false;
+      entry.root.position.z = 0;
+      resolve();
+    },
+  }));
+}
+
+function driveIn(entry) {
+  const s = { z: -DRIVE };
+  setScan(-1000); // show everything
+  setLights(entry, false, true);
+  entry.shadowMats.forEach((m) => (m.opacity = 1));
+  entry.root.position.z = s.z;
+  entry.root.visible = true;
+  spinWheels(entry, s.z);
+  return new Promise((resolve) => animate(s, {
+    z: 0,
+    duration: 1900,
+    ease: 'outQuart',
+    onUpdate: () => { entry.root.position.z = s.z; spinWheels(entry, s.z); },
+    onComplete: resolve,
+  }));
+}
+
 // ---------------------------------------------------------------- UI
 const $ = (sel) => document.querySelector(sel);
 const picker = $('#picker');
@@ -501,11 +559,21 @@ async function showCar(id) {
   await scrollToTop();
   document.body.classList.add('locked');
   hideText();
-  if (current) current.root.visible = false;
+  if (current && !reducedMotion) {
+    drawRing(900, true);
+    await driveOut(current);
+  } else if (current) {
+    current.root.visible = false;
+  }
   const next = await nextPromise;
   btn.classList.remove('loading');
   stageCar(next);
-  showInstantly(next);
+  if (reducedMotion) showInstantly(next);
+  else {
+    await driveIn(next);
+    setLights(next, true);
+    drawRing(1200);
+  }
   revealText($('.hero'));
   observePanels();
   document.body.classList.remove('locked');
