@@ -346,10 +346,11 @@ function explode(entry) {
     const homeRot = p.rotation.clone();
     const wc = new THREE.Box3().setFromObject(p).getCenter(new THREE.Vector3());
     const dir = wc.clone().sub(centre);
-    dir.y = Math.max(dir.y, 0) + 0.6;
+    // mostly up and out, and not too far: big parts thrown toward the camera fill the whole frame
+    dir.y = Math.max(dir.y, 0) + 0.9;
     if (dir.lengthSq() < 1e-4) dir.set(0, 1, 0);
     dir.normalize();
-    const spread = dims.len * (0.55 + seeded(i) * 0.5);
+    const spread = dims.len * (0.3 + seeded(i) * 0.35);
     const worldStart = p.getWorldPosition(new THREE.Vector3()).addScaledVector(dir, spread);
     const localStart = p.parent.worldToLocal(tmp.copy(worldStart)).clone();
     const jitter = (k) => (seeded(i * 7 + k) - 0.5) * 0.8;
@@ -362,6 +363,9 @@ function explode(entry) {
 
 function playIntro(entry) {
   const { dims } = entry;
+  // visible before collecting wires: isVisible() walks up to the root, which starts hidden
+  setScan(1000);
+  entry.root.visible = true;
   const wires = entry.meshes.filter(isVisible).map((o) => {
     const w = new THREE.Mesh(o.geometry, wireMat);
     w.frustumCulled = false;
@@ -379,10 +383,16 @@ function playIntro(entry) {
   ));
   scene.add(sheet);
 
+  // everything stays wireframe until the scan starts (setScan(1000) above), wherever the parts are flying
   const partAnims = explode(entry);
-  setScan(dims.front + 0.05);
   Object.assign(intro, { yaw: -1.4, elev: 0.9, dist: 1.7, lookY: 0.4 });
-  entry.root.visible = true;
+
+  // cars with 100+ parts get a tighter stagger so every part has landed before the scan
+  const stagger = Math.min(55, 1100 / partAnims.length);
+  const flight = 1400;
+  const landed = 300 + (partAnims.length - 1) * stagger + flight;
+  const scanStart = Math.max(2600, landed + 100);
+  const scanDur = 1800;
 
   return new Promise((resolve) => {
     const tl = createTimeline({
@@ -395,14 +405,12 @@ function playIntro(entry) {
       },
     });
     // camera swoops down from above while parts fly home
-    tl.add(intro, { yaw: 0, elev: 0, dist: 1, lookY: 0, duration: 3600, ease: 'inOutQuart' }, 0);
+    tl.add(intro, { yaw: 0, elev: 0, dist: 1, lookY: 0, duration: scanStart + 1000, ease: 'inOutQuart' }, 0);
     partAnims.forEach(({ p, home, homeRot }, i) => {
-      const at = 300 + i * Math.min(55, 2400 / partAnims.length);
-      tl.add(p.position, { x: home.x, y: home.y, z: home.z, duration: 1500 }, at);
-      tl.add(p.rotation, { x: homeRot.x, y: homeRot.y, z: homeRot.z, duration: 1500 }, at);
+      const at = 300 + i * stagger;
+      tl.add(p.position, { x: home.x, y: home.y, z: home.z, duration: flight }, at);
+      tl.add(p.rotation, { x: homeRot.x, y: homeRot.y, z: homeRot.z, duration: flight }, at);
     });
-    const scanStart = 2600;
-    const scanDur = 1800;
     const scan = { z: dims.front + 0.05 };
     tl.add(sheet.material, { opacity: [0, 0.12], duration: 250, ease: 'linear' }, scanStart)
       .add(sheet.children[0].material, { opacity: [0, 0.9], duration: 250, ease: 'linear' }, scanStart)
@@ -410,7 +418,11 @@ function playIntro(entry) {
         z: dims.back - 0.05,
         duration: scanDur,
         ease: 'inOutSine',
-        onUpdate: () => { setScan(scan.z); sheet.position.z = scan.z; },
+        onUpdate: () => {
+          if (tl.currentTime < scanStart) return; // stay all-wireframe until the sheet arrives
+          setScan(scan.z);
+          sheet.position.z = scan.z;
+        },
       }, scanStart)
       .add(sheet.material, { opacity: 0, duration: 300, ease: 'linear' }, scanStart + scanDur - 200)
       .add(sheet.children[0].material, { opacity: 0, duration: 300, ease: 'linear' }, scanStart + scanDur - 200)
