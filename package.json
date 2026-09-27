@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "description": "A night-time car showroom in the browser, built with three.js and anime.js",
   "private": true,
-  "source": "src/index.html",
+  "source": ["src/index.html", "src/about.html"],
   "scripts": {
     "start": "parcel",
     "build": "parcel build --public-url ./"

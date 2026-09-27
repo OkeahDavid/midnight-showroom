@@ -5,6 +5,7 @@ import { EffectComposer } from 'three/examples/jsm/postprocessing/EffectComposer
 import { RenderPass } from 'three/examples/jsm/postprocessing/RenderPass.js';
 import { UnrealBloomPass } from 'three/examples/jsm/postprocessing/UnrealBloomPass.js';
 import { OutputPass } from 'three/examples/jsm/postprocessing/OutputPass.js';
+import { ShaderPass } from 'three/examples/jsm/postprocessing/ShaderPass.js';
 import { animate, createTimeline, onScroll, stagger } from 'animejs';
 import { CARS } from './cars.js';
 
@@ -36,11 +37,52 @@ const rim = new THREE.DirectionalLight(0x9fc4ff, 1.0);
 rim.position.set(6, 3, -6);
 scene.add(key, rim, new THREE.AmbientLight(0xffffff, 0.15));
 
+// ---------------------------------------------------------------- selective bloom
+// Only things on the GLOW layer (lamps, the floor ring) bloom. Blooming the whole frame also
+// caught sharp reflections on rims and chrome and turned them into glowing starbursts.
+const GLOW = 1;
+const glowLayer = new THREE.Layers();
+glowLayer.set(GLOW);
+const blackMat = new THREE.MeshBasicMaterial({ color: 0x000000 });
+
+const glowComposer = new EffectComposer(renderer);
+glowComposer.renderToScreen = false;
+glowComposer.addPass(new RenderPass(scene, camera));
+const bloom = new UnrealBloomPass(new THREE.Vector2(innerWidth / 2, innerHeight / 2), 0.55, 0.3, 0);
+glowComposer.addPass(bloom);
+
+const mixPass = new ShaderPass(new THREE.ShaderMaterial({
+  uniforms: { baseTexture: { value: null }, bloomTexture: { value: glowComposer.renderTarget2.texture } },
+  vertexShader: 'varying vec2 vUv; void main() { vUv = uv; gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0); }',
+  fragmentShader: 'uniform sampler2D baseTexture; uniform sampler2D bloomTexture; varying vec2 vUv; void main() { gl_FragColor = texture2D(baseTexture, vUv) + texture2D(bloomTexture, vUv); }',
+}), 'baseTexture');
+mixPass.needsSwap = true;
+
 const composer = new EffectComposer(renderer);
 composer.addPass(new RenderPass(scene, camera));
-const bloom = new UnrealBloomPass(new THREE.Vector2(innerWidth / 2, innerHeight / 2), 0.55, 0.5, 2.0);
-composer.addPass(bloom);
+composer.addPass(mixPass);
 composer.addPass(new OutputPass());
+
+const stash = new Map();
+function renderGlow() {
+  // non-glowing solids turn black so they still hide lamps behind them; see-through glass is
+  // skipped entirely so headlights can shine through their lenses
+  scene.traverseVisible((o) => {
+    if (!o.isMesh && !o.isLineSegments) return;
+    if (o.layers.test(glowLayer)) return;
+    const mats = [].concat(o.material);
+    const see = mats.some((m) => (m.transparent && m.opacity < 0.9) || m.wireframe);
+    stash.set(o, { material: o.material, visible: o.visible });
+    if (see || o.isLineSegments) o.visible = false;
+    else o.material = blackMat;
+  });
+  const bg = scene.background;
+  scene.background = null;
+  glowComposer.render();
+  scene.background = bg;
+  stash.forEach((s, o) => { o.material = s.material; o.visible = s.visible; });
+  stash.clear();
+}
 
 // ---------------------------------------------------------------- camera state
 // intro and scroll each drive their own object; the render loop combines them
@@ -55,18 +97,19 @@ function updateCamera() {
   const elev = THREE.MathUtils.clamp(base.elev + intro.elev + scroll.elev, 0.02, 1.5);
   // portrait screens: back off so the whole car fits the narrow frame, and sit it lower, under the text
   const portrait = Math.max(0, 1 - camera.aspect);
-  const dist = base.dist * intro.dist * scroll.dist * THREE.MathUtils.clamp(1.05 / camera.aspect, 1, 2.3);
+  const dist = base.dist * intro.dist * scroll.dist * THREE.MathUtils.clamp(0.9 / camera.aspect, 1, 2.1);
   camera.position.set(
     Math.sin(yaw) * Math.cos(elev) * dist,
     Math.sin(elev) * dist,
     Math.cos(yaw) * Math.cos(elev) * dist,
   );
   // narrower screens get less pan so the car doesn't slide out of frame
-  const pan = scroll.pan * THREE.MathUtils.clamp(camera.aspect / 1.8, 0.35, 1);
+  // (portrait layouts stack text above the car, so no pan at all)
+  const pan = camera.aspect < 1 ? 0 : scroll.pan * THREE.MathUtils.clamp(camera.aspect / 1.8, 0.35, 1);
   const px = Math.cos(yaw) * pan, pz = -Math.sin(yaw) * pan;
   camera.position.x += px;
   camera.position.z += pz;
-  lookAt.set(px, 0.55 + intro.lookY + scroll.lookY + portrait * 1.6, pz);
+  lookAt.set(px, 0.55 + intro.lookY + scroll.lookY + portrait * 3.2, pz);
   camera.lookAt(lookAt);
 }
 
@@ -102,12 +145,13 @@ function buildRing(len) {
   for (let i = 0; i < pos.count; i++) {
     const a = Math.atan2(pos.getY(i), pos.getX(i));
     col.setHSL(((a / (Math.PI * 2)) + 1.3) % 1, 0.95, 0.55);
-    colors.push(col.r * 4, col.g * 4, col.b * 4);
+    colors.push(col.r * 1.4, col.g * 1.4, col.b * 1.4);
   }
   geo.setAttribute('color', new THREE.Float32BufferAttribute(colors, 3));
   ringCount = geo.index.count;
   geo.setDrawRange(0, 0);
   ring = new THREE.Mesh(geo, new THREE.MeshBasicMaterial({ vertexColors: true, toneMapped: false, side: THREE.DoubleSide }));
+  ring.layers.enable(GLOW);
   ring.rotation.x = -Math.PI / 2;
   ring.rotation.z = Math.PI / 2;
   ring.position.y = 0.01;
@@ -201,6 +245,7 @@ function prepareCar(car, model) {
         l.toneMapped = false;
         l.userData.baseOpacity = l.opacity;
         (isFront ? frontLights : rearLights).push(l);
+        o.layers.enable(GLOW);
         return l;
       }
       if (!seen.has(m)) {
@@ -509,11 +554,6 @@ function renderText(car) {
     });
     sw.appendChild(b);
   });
-  const m = car.model3d.credit;
-  $('#credits').innerHTML =
-    `3D model: <a href="${m.url}" target="_blank" rel="noopener">“${m.title}”</a> by ${m.author}, licensed under <a href="${m.licenseUrl}" target="_blank" rel="noopener">${m.license}</a>, optimized for the web.` +
-    `<br>Sources: ${car.sources.map(([t, u]) => `<a href="${u}" target="_blank" rel="noopener">${t}</a>`).join(' · ')}` +
-    `<br>An independent fan project, not affiliated with ${car.brand === 'BMW' ? 'BMW AG' : car.brand}.`;
 }
 
 function hideText() {
@@ -640,6 +680,7 @@ function setupScroll() {
 // ---------------------------------------------------------------- loop
 function tick() {
   updateCamera();
+  renderGlow();
   composer.render();
 }
 
@@ -648,6 +689,7 @@ addEventListener('resize', () => {
   camera.updateProjectionMatrix();
   renderer.setSize(innerWidth, innerHeight);
   composer.setSize(innerWidth, innerHeight);
+  glowComposer.setSize(innerWidth, innerHeight);
   bloom.resolution.set(innerWidth / 2, innerHeight / 2);
 });
 

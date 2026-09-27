@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>About · Midnight Showroom</title>
+  <meta name="description" content="How Midnight Showroom works, and credits for its 3D models and sources." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="./style.css" />
+</head>
+<body class="about-page">
+  <header class="topbar">
+    <a class="wordmark" href="./">Midnight Showroom</a>
+    <a class="about-link" href="./">← Showroom</a>
+  </header>
+
+  <main class="about">
+    <p class="kicker">About</p>
+    <h1>Midnight Showroom</h1>
+    <p class="about-lede">
+      A night-time car showroom in the browser. Each car flies together part by part as a wireframe,
+      gets painted in by a scanning light, drives in and out as you switch, and comes with sourced specs
+      and real colours.
+    </p>
+
+    <section>
+      <h2>How it works</h2>
+      <ul class="about-points">
+        <li><strong>Rendering.</strong> <a href="https://threejs.org" target="_blank" rel="noopener">three.js</a> draws the cars in a custom studio lit by soft light strips. Only the lamps and the floor ring glow.</li>
+        <li><strong>Motion.</strong> <a href="https://animejs.com" target="_blank" rel="noopener">anime.js</a> drives the assembly, the scan, the drive-in and the scroll-linked camera.</li>
+        <li><strong>Models.</strong> Each model is compressed to a few megabytes with <a href="https://gltf-transform.dev" target="_blank" rel="noopener">glTF Transform</a>. Every part is kept separate so the car can be taken apart and its wheels can roll.</li>
+        <li><strong>Data.</strong> Specs, history and paint lists live in one data file, so adding a car means adding one entry and its model.</li>
+      </ul>
+    </section>
+
+    <section>
+      <h2>The cars</h2>
+      <div id="about-cars" class="about-cars"></div>
+    </section>
+
+    <section>
+      <h2>Credits</h2>
+      <p class="about-note">
+        Built by <a href="https://davidokeah.com" target="_blank" rel="noopener">David Okeah</a>.
+        The code is on <a href="https://github.com/OkeahDavid/midnight-showroom" target="_blank" rel="noopener">GitHub</a> under the MIT licence.
+        The 3D models keep their own Creative Commons licences, listed above.
+      </p>
+      <p class="about-note">
+        An independent fan project, not affiliated with or endorsed by any of the manufacturers shown.
+        Paint swatches are on-screen approximations of the real colours.
+      </p>
+    </section>
+  </main>
+
+  <script type="module" src="./about.js"></script>
+</body>
+</html>
