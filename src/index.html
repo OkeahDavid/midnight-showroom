@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Midnight Showroom</title>
+  <meta name="description" content="Four cars assembled and driven in your browser: Porsche 911 Carrera 4S, Mercedes-AMG SL 63, BMW M4 CSL and Lamborghini Centenario." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="./style.css" />
+</head>
+<body class="locked">
+  <canvas id="scene"></canvas>
+
+  <div id="loader">
+    <span class="loader-label">Loading model</span>
+    <span id="loader-pct">0%</span>
+  </div>
+
+  <header class="topbar">
+    <span class="wordmark">Midnight Showroom</span>
+    <nav id="picker" aria-label="Choose a car"></nav>
+  </header>
+
+  <main id="track">
+    <section class="panel hero">
+      <p class="kicker" id="hero-brand"></p>
+      <h1 id="hero-model"></h1>
+      <p class="years" id="hero-years"></p>
+      <p class="lede" id="hero-lede"></p>
+      <p class="scroll-hint">Scroll</p>
+    </section>
+
+    <section class="panel right">
+      <p class="kicker">01 / Performance</p>
+      <h2>By the numbers</h2>
+      <dl id="specs" class="specs"></dl>
+    </section>
+
+    <section class="panel">
+      <p class="kicker">02 / Story</p>
+      <h2>Where it came from</h2>
+      <div id="story" class="story"></div>
+    </section>
+
+    <section class="panel right">
+      <p class="kicker">03 / Details</p>
+      <h2>Worth knowing</h2>
+      <ul id="details" class="details"></ul>
+    </section>
+
+    <section class="panel paint">
+      <p class="kicker">04 / Paint</p>
+      <h2>Pick a colour</h2>
+      <p id="paint-note" class="paint-note"></p>
+      <div id="swatches" role="radiogroup" aria-label="Paint colour"></div>
+    </section>
+  </main>
+
+  <footer id="credits"></footer>
+
+  <script type="module" src="./main.js"></script>
+</body>
+</html>

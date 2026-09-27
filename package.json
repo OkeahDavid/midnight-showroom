@@ -1,0 +1,20 @@
+{
+  "name": "midnight-showroom",
+  "version": "1.0.0",
+  "description": "Four cars assembled and driven in the browser with three.js and anime.js",
+  "private": true,
+  "source": "src/index.html",
+  "scripts": {
+    "start": "parcel",
+    "build": "parcel build --public-url ./"
+  },
+  "author": "David Okeah",
+  "license": "MIT",
+  "dependencies": {
+    "animejs": "^4.5.0",
+    "three": "^0.186.1"
+  },
+  "devDependencies": {
+    "parcel": "^2.16.4"
+  }
+}

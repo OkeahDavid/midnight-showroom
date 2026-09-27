@@ -1,0 +1,21 @@
+# Dependencies
+node_modules/
+
+# Parcel build & cache
+dist/
+.parcel-cache/
+
+# Unoptimized source models (large; see README for how to rebuild the web versions)
+raw/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Editor
+.vscode/
+*.swp
+*.swo
+
+# Logs
+npm-debug.log*
