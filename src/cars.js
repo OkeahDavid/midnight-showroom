@@ -158,4 +158,60 @@ export const CARS = [
       ['BMW Group PressClub: The all-new BMW M4 CSL', 'https://www.press.bmwgroup.com/global/article/detail/T0386533EN/the-all-new-bmw-m4-csl-the-re-edition-of-a-legend?language=en'],
     ],
   },
+
+  {
+    id: 'lamborghini-centenario',
+    brand: 'Lamborghini',
+    model: 'Centenario',
+    short: 'Centenario',
+    generation: 'LP 770-4',
+    years: '2016 · 20 coupés, 20 roadsters',
+    lede: 'Built to mark the 100th birthday of Ferruccio Lamborghini, and at launch the most powerful Lamborghini ever made.',
+    lengthM: 4.92,
+    model3d: {
+      url: new URL('./assets/lamborghini-centenario.glb', import.meta.url),
+      // the body is one exposed-carbon material; the coloured trim is a separate accent material
+      paint: ['Carbon_R'],
+      accent: ['Material'],
+      lights: { front: ['LIGT_BLC'], rear: ['LIGT_RED'] },
+      wheels: ['<Wheel_0', '<Wheel.003_2'],
+      // a stray 2 m tall mesh inside the wheel group; it lifts the car off the floor
+      hide: ['<Wheel.001_1'],
+      credit: { title: 'Lamborghini Centenario LP-770 Interior SDC', author: 'SDC PERFORMANCE', url: 'https://sketchfab.com/3d-models/lamborghini-centenario-lp-770-interior-sdc-d679af35b5694301a185c7454a700c73', license: 'CC BY 4.0', licenseUrl: 'https://creativecommons.org/licenses/by/4.0/' },
+    },
+    specs: [
+      ['Engine', '6.5 L V12, naturally aspirated'],
+      ['Power', '770 CV (566 kW) at 8,500 rpm'],
+      ['Torque', '690 Nm at 5,500 rpm'],
+      ['0–100 km/h', '2.8 s'],
+      ['0–300 km/h', '23.5 s'],
+      ['Top speed', 'over 350 km/h'],
+      ['Drive', 'All-wheel drive'],
+    ],
+    story: [
+      'Unveiled at the 2016 Geneva Motor Show for the centenary of the company’s founder. The roadster followed at Pebble Beach that August.',
+      'Only 40 were built, 20 coupés and 20 roadsters, all sold by invitation.',
+    ],
+    details: [
+      'The first Lamborghini with rear-wheel steering.',
+      'A carbon-fibre monocoque with aluminium front and rear subframes.',
+      'Its aerodynamics make 227 kg of downforce at 280 km/h.',
+    ],
+    paints: [
+      { name: 'Carbon, yellow accents', code: '2016 Geneva show car', carbon: true, accent: '#e7b000' },
+      { name: 'Carbon, Blu Nethuns accents', code: 'first US delivery', carbon: true, accent: '#1f64c8' },
+      { name: 'Verde Bronte', code: 'Hong Kong coupé', hex: '#3d7a22', finish: 'metallic', accent: '#b8912c' },
+      { name: 'Rosso Efesto', code: 'roadster', hex: '#c0141b', finish: 'metallic', accent: '#111111' },
+      { name: 'Blu Cepheus', code: 'roadster', hex: '#12306a', finish: 'metallic' },
+    ],
+    paintNote: 'Every Centenario was specified by its owner. These are finishes of documented cars, most of them bare carbon with coloured accents.',
+    sources: [
+      ['Lamborghini: Centenario', 'https://www.lamborghini.com/en-en/history/few-off/centenario'],
+      ['Wikipedia: Lamborghini Centenario', 'https://en.wikipedia.org/wiki/Lamborghini_Centenario'],
+      ['Carscoops: Rosso Efesto roadster', 'https://www.carscoops.com/2024/01/gloss-red-lamborghini-centenario-roadster-is-a-true-italian-unicorn/'],
+      ['Hypebeast: Verde Bronte Centenario', 'https://hypebeast.com/2017/10/lamborghini-centenario-verde-bronte'],
+      ['duPont Registry: Blu Cepheus roadster', 'https://news.dupontregistry.com/for-sale/discovered-on-dr-2017-lamborghini-centenario-in-blue-cepheus/'],
+      ['CarBuzz: first US Centenario in Blu Nethuns', 'https://carbuzz.com/news/lamborghini-delivers-first-centenario-to-us-in-gorgeous-blue-nethuns-spec/'],
+    ],
+  },
 ];
