@@ -1,7 +1,7 @@
 {
   "name": "midnight-showroom",
   "version": "1.0.0",
-  "description": "Four cars assembled and driven in the browser with three.js and anime.js",
+  "description": "A night-time car showroom in the browser, built with three.js and anime.js",
   "private": true,
   "source": "src/index.html",
   "scripts": {

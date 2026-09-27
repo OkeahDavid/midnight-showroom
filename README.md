@@ -1,6 +1,6 @@
 # Midnight Showroom
 
-A night-time car showroom in the browser: four cars in a dark studio, inspired by the 3D hero on [animejs.com](https://animejs.com). Built with [three.js](https://threejs.org), [anime.js](https://animejs.com) v4 and Parcel.
+A night-time car showroom in the browser: cars in a dark studio, inspired by the 3D hero on [animejs.com](https://animejs.com). Built with [three.js](https://threejs.org), [anime.js](https://animejs.com) v4 and Parcel.
 
 - **Assembly intro:** the first car you open flies together part by part as a wireframe. A scan sheet then paints it solid from front to back, the lights switch on and a neon ring draws itself on the floor.
 - **Scroll tour:** scrolling orbits the camera through side, rear and top views, alongside the car's specs, history and details.
