@@ -107,4 +107,55 @@ export const CARS = [
       ['Mercedes-Benz of South Bay: 2025 SL colours', 'https://www.sbmercedes.com/research/mercedes-amg-sl-roadster-colors.htm'],
     ],
   },
+
+  {
+    id: 'bmw-m4-csl',
+    brand: 'BMW',
+    model: 'M4 CSL',
+    short: 'M4 CSL',
+    generation: 'M GmbH · G82',
+    years: '2022 – 2023 · 1,000 built',
+    lede: 'Competition, Sport, Lightweight. 100 kg lighter and 40 hp stronger than the M4 Competition, and the fastest production BMW ever around the Nordschleife.',
+    lengthM: 4.80,
+    model3d: {
+      url: new URL('./assets/bmw-m4-csl.glb', import.meta.url),
+      paint: ['M4xNME_Paint'],
+      lights: {
+        front: ['M4xNME_runningY'],
+        frontColor: 0xffd23a,
+        rear: ['M4xNME_brake', 'M4xNME_brake.002', 'M4xNME_LS8.001'],
+      },
+      wheels: ['M4xNME_wheels_enkeif', 'M4xNME_wheels_enkeif.001', 'M4xNME_wheels_enkeif.002', 'M4xNME_wheels_enkeif.003'],
+      hide: ['M4xNME_unused'],
+      credit: { title: 'BMW m4 CSL 2023', author: 'Black Snow', url: 'https://sketchfab.com/3d-models/bmw-m4-csl-2023-26d05968e63b4fc28205cbb9abb0ea41', license: 'CC BY 4.0', licenseUrl: 'https://creativecommons.org/licenses/by/4.0/' },
+    },
+    specs: [
+      ['Engine', '3.0 L twin-turbo inline-six'],
+      ['Power', '550 hp (405 kW) at 6,250 rpm'],
+      ['Torque', '650 Nm at 2,750 – 5,950 rpm'],
+      ['0–100 km/h', '3.7 s'],
+      ['0–200 km/h', '10.7 s'],
+      ['Top speed', '307 km/h (governed)'],
+      ['Kerb weight', '1,625 kg (DIN)'],
+    ],
+    story: [
+      'BMW M unveiled the M4 CSL at the Concorso d’Eleganza Villa d’Este in May 2022 as part of its 50th anniversary. Production at Dingolfing was capped at 1,000 cars.',
+      'Its notarised lap of the 20.832 km Nordschleife, 7 min 20.207 s, was the fastest ever by a series-production BMW.',
+    ],
+    details: [
+      'The lineage runs from the 1973 European Touring Car champion 3.0 CSL through the 2003 M3 CSL.',
+      'Boost rises from 1.7 to 2.1 bar over the M4 Competition. Drive goes to the rear wheels through an eight-speed M Steptronic.',
+      'The rear seats are gone, replaced by M Carbon full bucket seats for two.',
+      'Laser headlights glow yellow, a nod to GT racing.',
+    ],
+    paints: [
+      { name: 'Frozen Brooklyn Grey', code: 'standard', hex: '#7e8284', finish: 'matte' },
+      { name: 'Alpine White', code: 'solid', hex: '#efefec', finish: 'solid' },
+      { name: 'Sapphire Black', code: 'metallic', hex: '#121418', finish: 'metallic' },
+    ],
+    paintNote: 'The only three colours BMW offered on the M4 CSL.',
+    sources: [
+      ['BMW Group PressClub: The all-new BMW M4 CSL', 'https://www.press.bmwgroup.com/global/article/detail/T0386533EN/the-all-new-bmw-m4-csl-the-re-edition-of-a-legend?language=en'],
+    ],
+  },
 ];
