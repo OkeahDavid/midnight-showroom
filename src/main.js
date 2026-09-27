@@ -561,6 +561,10 @@ function hideText() {
 }
 
 function revealText(panel) {
+  if (reducedMotion) {
+    [...panel.children].forEach((el) => { el.style.opacity = 1; el.style.transform = 'none'; });
+    return;
+  }
   animate(panel.children, { opacity: [0, 1], translateY: [24, 0], delay: stagger(90), duration: 900, ease: 'outExpo' });
 }
 
